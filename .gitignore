@@ -1,0 +1,44 @@
+# Python
+__pycache__
+.py[cod]
+.pyo
+
+# Virtual environments
+.venv
+venv
+env
+
+# Environmentsecrets
+.env
+.env.
+!.env.example
+
+# Local databases
+.db
+.sqlite
+.sqlite3
+
+# Logs
+.log
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+.tmp
+.temp
+
+# Testcache
+.pytest_cache
+.coverage
+htmlcov
+
+# Generatedruntime data
+datapipeline_state.db
+data.csv
+data.json

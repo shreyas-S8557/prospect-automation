@@ -1,0 +1,45 @@
+=== saas_ai_founders replay report (no live network in this sandbox) ===
+Input raw rows (previous stale 50-record output): 50
+Discovered candidates (single clean person, passed contamination/name/location/company-page gate): 22
+Rejected at discovery (contaminated / not a person / no usable name or location): 28
+Qualified (passed qualify_row against saas_founders.json): 0
+Disqualified (clean candidate, but failed target criteria): 22
+With confirmed keyword relevance (AI/automation evidence): 0
+With confirmed industry evidence (SaaS): 0
+With usable age evidence (confidence != none): 0
+
+-- Example rejection reasons (discovery/contamination stage) --
+'Alessandra Esposito' <- title='Alessandra Esposito - Pomona Capital | LinkedIn'
+'Austin Maxwell' <- title='Austin Maxwell - Cofounder - Kanga Coolers | Shark Tank ...Phillip Zedalis - Chief AI Offi'
+'Bryan Landerman' <- title='Bryan Landerman - CTO & Operating Partner at ... - LinkedInBrian Wehrle - Chief Technology'
+'Charlie Banks' <- title='Charlie Banks - Co-Founder & Managing Director ... - LinkedInAlex Skatell - Co-Founder & C'
+'Chuck Foster' <- title='Chuck Foster - CTO / VP Engineering | Scaling SaaS ... - LinkedInJames Green - CTO at Bynu'
+'Daniel Smith' <- title="Daniel Smith - Founder | LinkedInEjay O'Donnell - Co-Founder of Dad Gang Co. | LinkedInRei"
+'Dennis Berscak' <- title='Dennis Berscak - Technology Executive | Transformational ...Varadheesh Chennakrishnan - Ch'
+'Eddie Coates' <- title='Eddie Coates - Co-Founder at CANVAS Architecture ... - LinkedInErin Cornell - Co-Founder a'
+'Erin Cornell' <- title='Erin Cornell - Co-Founder at Oklahoma City Moms Blog | LinkedInAshley Murphy - Co-Founder '
+'Esteban Hernandez, PE, PMP, EC.' <- title='Esteban Hernandez, PE, PMP, EC. - LinkedInJohn Nichols - Founder at Stugo™ | LinkedInOmayr'
+'Hilary Tetenbaum' <- title='Hilary Tetenbaum - Santa Monica, California, United States | Professional Profile | Linked'
+'Jay Leon' <- title='Jay Leon - CTO | Creator of Enso Methodology - LinkedInChuck Foster - CTO / VP Engineering'
+'Joseph M. Jablonski' <- title='Joseph M. Jablonski - Unite Us | LinkedIn'
+'José C. Rodriguez' <- title='José C. Rodriguez - Pomona College | LinkedIn'
+'Justin Nevins' <- title='Justin Nevins - Founder, Tentacle Ops | Helping ... - LinkedInScot Chisholm - CEO Coach @ '
+
+-- Example disqualification reasons (qualify_row stage) --
+'Ann Marie Martin': company ('Southern New Hampshire University') is a university/school/government body, not a target company
+'berta paterson': no strong evidence of required industry (SaaS) tied to this person's role/company; no strong evidence of required keyword (AI, automation) tied to this person's role/company
+'Bill Winchester': no strong evidence of required industry (SaaS) tied to this person's role/company; no strong evidence of required keyword (AI, automation) tied to this person's role/company
+'Brandon Barker': job title does not match any configured target title; no strong evidence of required industry (SaaS) tied to this person's role/company; no strong evidence of required keyword (AI, automation) tied to this person's role/company
+'Caitlin Miller': job title does not match any configured target title; no strong evidence of required industry (SaaS) tied to this person's role/company; no strong evidence of required keyword (AI, automation) tied to this person's role/company
+'Clay Bradley': job title does not match any configured target title; no strong evidence of required industry (SaaS) tied to this person's role/company; no strong evidence of required keyword (AI, automation) tied to this person's role/company
+'Clive Roux': job title does not match any configured target title; no strong evidence of required industry (SaaS) tied to this person's role/company; no strong evidence of required keyword (AI, automation) tied to this person's role/company
+'Craig Levi': no strong evidence of required industry (SaaS) tied to this person's role/company; no strong evidence of required keyword (AI, automation) tied to this person's role/company
+'David Nickelson': job title does not match any configured target title; no strong evidence of required industry (SaaS) tied to this person's role/company; no strong evidence of required keyword (AI, automation) tied to this person's role/company
+'David Strong': no strong evidence of required industry (SaaS) tied to this person's role/company; no strong evidence of required keyword (AI, automation) tied to this person's role/company
+'Gloria "Glo" Redding': no strong evidence of required industry (SaaS) tied to this person's role/company; no strong evidence of required keyword (AI, automation) tied to this person's role/company
+'Ian Miller': no strong evidence of required industry (SaaS) tied to this person's role/company; no strong evidence of required keyword (AI, automation) tied to this person's role/company
+'James P. (Pat) Templeton': job title does not match any configured target title; no strong evidence of required industry (SaaS) tied to this person's role/company; no strong evidence of required keyword (AI, automation) tied to this person's role/company
+'Jason Golden': job title does not match any configured target title; no strong evidence of required industry (SaaS) tied to this person's role/company; no strong evidence of required keyword (AI, automation) tied to this person's role/company
+'Matt Crawford': no strong evidence of required industry (SaaS) tied to this person's role/company; no strong evidence of required keyword (AI, automation) tied to this person's role/company
+
+NOTE: no OPENAI_API_KEY / network in this sandbox, so the LLM half of per-candidate enrichment (extract_company_names_llm / extract_ages_llm, task item 6) did not run. Industry/keyword evidence above reflects only what the raw DDGS snippet itself states - in a networked run, the 'company_name'/'qualify' phases would research thin candidates further before final qualification, which should raise the qualified count.

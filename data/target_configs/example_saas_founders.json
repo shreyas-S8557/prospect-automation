@@ -1,0 +1,13 @@
+{
+  "locations": ["United States"],
+  "titles": ["Founder", "CEO", "CTO"],
+  "industries": ["SaaS"],
+  "keywords": ["AI", "automation"],
+  "company_size_min": null,
+  "company_size_max": null,
+  "age_min": 22,
+  "age_max": 35,
+  "target_count": 1000,
+  "exclude_keywords": [],
+  "name": "saas_ai_founders"
+}

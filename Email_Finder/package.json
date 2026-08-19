@@ -1,0 +1,28 @@
+{
+  "name": "email-verifier",
+  "version": "1.0.0",
+  "description": "Free email verification using DNS MX + SMTP RCPT TO. Zero dependencies, pure Node.js.",
+  "main": "verify_smtp.js",
+  "bin": {
+    "verify-mx": "./verify_mx.js",
+    "verify-smtp": "./verify_smtp.js"
+  },
+  "scripts": {
+    "verify:mx": "node verify_mx.js",
+    "verify:smtp": "node verify_smtp.js"
+  },
+  "keywords": [
+    "email",
+    "verification",
+    "validate",
+    "smtp",
+    "mx",
+    "bounce",
+    "deliverability"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=14"
+  },
+  "dependencies": {}
+}

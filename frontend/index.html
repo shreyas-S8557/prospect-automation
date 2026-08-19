@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Prospect Automation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root { --border:#ddd; --bg:#f7f7f8; --accent:#2563eb; --danger:#dc2626; --ok:#16a34a; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, Arial, sans-serif; margin: 0; background: var(--bg); color: #111; }
+  header { background:#111; color:#fff; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; }
+  header h1 { font-size:16px; margin:0; }
+  header input { padding:4px 8px; font-size:12px; width:220px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px; }
+  section { background:#fff; border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:16px; }
+  h2 { font-size:14px; text-transform:uppercase; letter-spacing:.05em; color:#555; margin-top:0; }
+  .row { display:flex; gap:16px; flex-wrap:wrap; }
+  .stat { flex:1; min-width:110px; text-align:center; padding:10px; border:1px solid var(--border); border-radius:6px; }
+  .stat .n { font-size:22px; font-weight:700; }
+  .stat .l { font-size:11px; color:#666; text-transform:uppercase; }
+  table { width:100%; border-collapse: collapse; font-size:13px; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--border); }
+  th { color:#666; font-weight:600; font-size:11px; text-transform:uppercase; }
+  tr.clickable { cursor:pointer; }
+  tr.clickable:hover { background:#f0f4ff; }
+  button { cursor:pointer; border:1px solid var(--border); background:#fff; padding:6px 12px; border-radius:6px; font-size:13px; }
+  button:hover { background:#f0f0f0; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  button.danger { background:var(--danger); color:#fff; border-color:var(--danger); }
+  button.ok { background:var(--ok); color:#fff; border-color:var(--ok); }
+  button:disabled { opacity:.5; cursor:default; }
+  input, textarea, select { padding:6px 8px; border:1px solid var(--border); border-radius:6px; font-size:13px; width:100%; }
+  label { font-size:12px; color:#444; display:block; margin-bottom:2px; }
+  .field { margin-bottom:10px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; background:#eee; }
+  .badge.QUALIFIED, .badge.APPROVED, .badge.SENT, .badge.EMAIL_VALIDATED { background:#dcfce7; color:#166534; }
+  .badge.FILTERED_OUT, .badge.REJECTED, .badge.SEND_FAILED, .badge.VALIDATION_FAILED { background:#fee2e2; color:#991b1b; }
+  .badge.DISCOVERED, .badge.PENDING { background:#e0e7ff; color:#3730a3; }
+  .muted { color:#888; font-size:12px; }
+  .bund-badge { display:inline-block; width:16px; height:16px; line-height:16px; text-align:center;
+    border-radius:3px; font-size:10px; font-weight:bold; margin-right:2px; cursor:help; }
+  .sig-unknown { background:#eee; color:#999; }
+  .sig-weak { background:#fef3c7; color:#92400e; }
+  .sig-strong { background:#dcfce7; color:#166534; }
+  .sig-confirmed { background:#bbf7d0; color:#14532d; border:1px solid #166534; }
+  .champ-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; cursor:help; }
+  .champ-low { background:#eee; color:#666; }
+  .champ-medium { background:#fef3c7; color:#92400e; }
+  .champ-high { background:#dcfce7; color:#166534; }
+  .tabs { display:flex; gap:6px; margin-bottom:12px; }
+  .tabs button.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .hidden { display:none; }
+  .job-line { font-size:12px; padding:6px; border:1px solid var(--border); border-radius:6px; margin-top:6px; }
+  .bar { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-top:4px; }
+  .bar > div { height:100%; background:var(--accent); }
+  .toolbar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+  .email-card { border:1px solid var(--border); border-radius:6px; padding:10px; margin-bottom:8px; }
+  .email-card .subject { font-weight:600; }
+  .email-card .body { white-space:pre-wrap; font-size:13px; color:#333; margin:6px 0; }
+  a.back { font-size:12px; cursor:pointer; color:var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Prospect Automation</h1>
+  <div>
+    <label style="color:#ccc;font-size:11px;">API base
+      <input id="apiBase" value="http://localhost:8000" />
+    </label>
+  </div>
+</header>
+
+<main>
+
+  <!-- DASHBOARD -->
+  <div id="view-dashboard">
+    <section>
+      <h2>Dashboard</h2>
+      <div class="row" id="dashStats"></div>
+    </section>
+
+    <section>
+      <div class="toolbar">
+        <h2 style="flex:1;margin:0;">Campaigns</h2>
+        <button class="primary" onclick="showNewCampaignForm()">+ New Campaign</button>
+      </div>
+      <table>
+        <thead><tr><th>Name</th><th>Status</th><th>Run state</th><th>Send mode</th><th>Created</th></tr></thead>
+        <tbody id="campaignList"></tbody>
+      </table>
+    </section>
+
+    <section id="newCampaignSection" class="hidden">
+      <h2>New Campaign</h2>
+      <div class="field"><label>Campaign name</label><input id="f_name" placeholder="SaaS Founders Q1" /></div>
+      <div class="field"><label>Description</label><input id="f_desc" placeholder="optional" /></div>
+      <div class="grid2">
+        <div class="field"><label>Titles (comma-separated)</label><input id="f_titles" placeholder="Founder, CEO, CTO" /></div>
+        <div class="field"><label>Industries (comma-separated)</label><input id="f_industries" placeholder="SaaS" /></div>
+        <div class="field"><label>Keywords (comma-separated)</label><input id="f_keywords" placeholder="AI, automation" /></div>
+        <div class="field"><label>Locations (comma-separated)</label><input id="f_locations" value="United States" /></div>
+        <div class="field"><label>Target lead count</label><input id="f_target" type="number" value="50" /></div>
+        <div class="field"><label>Discovery limit</label><input id="f_disclimit" type="number" value="200" /></div>
+      </div>
+      <div class="field" style="margin-top:8px;">
+        <label style="font-weight:600;">Age filter <span class="muted">(prospect's age, not company age — both optional)</span></label>
+        <div class="grid2">
+          <div class="field">
+            <label>Minimum age</label>
+            <input id="f_age_min" type="number" min="18" step="1" placeholder="e.g. 25" oninput="validateAgeFields()" />
+          </div>
+          <div class="field">
+            <label>Maximum age</label>
+            <input id="f_age_max" type="number" min="18" step="1" placeholder="e.g. 45" oninput="validateAgeFields()" />
+          </div>
+        </div>
+        <div id="ageFieldError" class="muted" style="color:var(--danger);"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Email subject template</label><input id="f_subject" placeholder="default if blank" /></div>
+        <div class="field"><label>Sender name</label><input id="f_sender" placeholder="Your Name" /></div>
+      </div>
+      <div class="field"><label>Email body template</label><textarea id="f_body" rows="3" placeholder="default if blank"></textarea></div>
+      <div class="field">
+        <label>Verified case study <span class="muted">(optional — a real result you can back up; leave blank to let the generator use honest, hedged language instead)</span></label>
+        <div class="grid2">
+          <input id="f_case_industries" placeholder="Applies to industries (comma-separated), e.g. AI SaaS" />
+          <input id="f_case_keywords" placeholder="Keywords (comma-separated), e.g. automation" />
+        </div>
+        <textarea id="f_case_text" rows="2" placeholder="e.g. Nestle cut operations cost 30% after adopting our automation agent." style="margin-top:6px;"></textarea>
+      </div>
+      <div class="field">
+        <label>Custom problem angle <span class="muted">(optional — tailor the outreach hook to YOUR industry, e.g. beauty &amp; wellness, legal, manufacturing; leave blank to use a generic, industry-neutral hook instead)</span></label>
+        <div class="grid2">
+          <input id="f_pain_industries" placeholder="Applies to industries (comma-separated), e.g. Beauty and Wellness" />
+          <input id="f_pain_keywords" placeholder="Keywords (comma-separated), e.g. spa, salon" />
+        </div>
+        <input id="f_pain_label" placeholder="Short label for the subject line, e.g. no-shows eating into revenue" style="margin-top:6px;" />
+        <textarea id="f_pain_phrase" rows="2" placeholder="e.g. last-minute cancellations and no-shows quietly eating into revenue" style="margin-top:6px;"></textarea>
+      </div>
+      <div class="field">
+        <label><input type="checkbox" id="f_sending_enabled" style="width:auto;" /> Enable sending</label>
+      </div>
+      <div class="field">
+        <label>Send mode</label>
+        <select id="f_sendmode">
+          <option value="dry_run">Dry run (simulate, never touches network)</option>
+          <option value="test">Test</option>
+          <option value="live">Live (real email — requires backend opt-in)</option>
+        </select>
+      </div>
+      <button class="primary" onclick="createCampaign()">Create Campaign</button>
+      <button onclick="hideNewCampaignForm()">Cancel</button>
+      <div id="newCampaignError" class="muted"></div>
+    </section>
+
+    <section>
+      <h2>Settings</h2>
+      <div id="providerStatus" class="row"></div>
+    </section>
+  </div>
+
+  <!-- CAMPAIGN DETAIL -->
+  <div id="view-campaign" class="hidden">
+    <a class="back" onclick="goDashboard()">&larr; All campaigns</a>
+    <section>
+      <h2 id="cdTitle">Campaign</h2>
+      <div id="cdTargeting" class="muted" style="margin-bottom:8px;"></div>
+      <div class="row" id="cdStats"></div>
+      <div class="toolbar" style="margin-top:12px;">
+        <button onclick="runAction('discover')">1. Discover</button>
+        <button onclick="runAction('qualify')">2. Qualify</button>
+        <button onclick="runAction('find-emails')">3. Find emails</button>
+        <button onclick="runAction('validate-emails')">4. Validate</button>
+        <button onclick="runAction('generate-emails')">5. Generate</button>
+        <button class="ok" onclick="runAction('send')">6. Send</button>
+      </div>
+      <div class="toolbar">
+        <button onclick="runControl('pause')">Pause</button>
+        <button onclick="runControl('resume')">Resume</button>
+        <button class="danger" onclick="runControl('stop')">Stop</button>
+      </div>
+      <div id="jobStatus"></div>
+    </section>
+
+    <div class="tabs">
+      <button id="tab-prospects" class="active" onclick="switchTab('prospects')">Prospects</button>
+      <button id="tab-accounts" onclick="switchTab('accounts')">Accounts</button>
+      <button id="tab-emails" onclick="switchTab('emails')">Emails</button>
+      <button id="tab-funnel" onclick="switchTab('funnel')">Funnel</button>
+    </div>
+
+    <section id="pane-prospects">
+      <input placeholder="Search prospects..." id="prospectSearch" oninput="loadProspects()" />
+      <table style="margin-top:10px;">
+        <thead><tr><th>Name</th><th>Company</th><th>Title</th><th>Email</th><th>Status</th><th>BUND (B/U/N/D)</th><th>Champion</th></tr></thead>
+        <tbody id="prospectList"></tbody>
+      </table>
+    </section>
+
+    <section id="pane-accounts" class="hidden">
+      <div class="muted" style="margin-bottom:10px;">
+        Contacts grouped by company. Best-contact-path is NOT sorted by seniority --
+        a practitioner with real problem evidence can outrank a title-only executive.
+      </div>
+      <div id="accountFunnel" style="margin-bottom:16px;"></div>
+      <div id="accountList"></div>
+    </section>
+
+    <section id="pane-emails" class="hidden">
+      <div class="toolbar">
+        <button class="ok" onclick="bulkEmailAction('approve-all')">Approve all pending</button>
+        <button class="danger" onclick="bulkEmailAction('reject-all')">Reject all pending</button>
+      </div>
+      <div id="emailList"></div>
+    </section>
+
+    <section id="pane-funnel" class="hidden">
+      <div id="funnelChart"></div>
+    </section>
+  </div>
+
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const apiBase = () => $('apiBase').value.replace(/\/$/, '');
+let currentCampaignId = null;
+let pollTimer = null;
+
+async function api(path, opts) {
+  const res = await fetch(apiBase() + path, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts,
+  });
+  if (!res.ok) {
+    let detail = res.statusText;
+    try { detail = (await res.json()).detail || detail; } catch (e) {}
+    throw new Error(detail);
+  }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+function badge(status) { return `<span class="badge ${status}">${status}</span>`; }
+function splitList(s) { return (s || '').split(',').map(x => x.trim()).filter(Boolean); }
+
+// ---------- Dashboard ----------
+
+async function loadDashboard() {
+  try {
+    const stats = await api('/api/dashboard/stats');
+    $('dashStats').innerHTML = [
+      ['total_campaigns', 'Campaigns'], ['active_campaigns', 'Active'],
+      ['total_prospects', 'Prospects'], ['qualified_prospects', 'Qualified'],
+      ['emails_found', 'Found'], ['emails_validated', 'Validated'],
+      ['emails_approved', 'Approved'], ['emails_sent', 'Sent'],
+    ].map(([k, l]) => `<div class="stat"><div class="n">${stats[k] ?? 0}</div><div class="l">${l}</div></div>`).join('');
+  } catch (e) { $('dashStats').innerHTML = `<span class="muted">Cannot reach backend: ${e.message}</span>`; }
+
+  try {
+    const list = await api('/api/campaigns?page_size=200');
+    $('campaignList').innerHTML = list.items.map(c => `
+      <tr class="clickable" onclick="openCampaign('${c.campaign_id}')">
+        <td>${c.campaign_name}</td>
+        <td>${badge(c.status)}</td>
+        <td>${c.run_state}</td>
+        <td>${c.send_mode}</td>
+        <td class="muted">${(c.created_at || '').slice(0, 10)}</td>
+      </tr>`).join('') || '<tr><td colspan="5" class="muted">No campaigns yet.</td></tr>';
+  } catch (e) { $('campaignList').innerHTML = `<tr><td class="muted">${e.message}</td></tr>`; }
+
+  try {
+    const s = await api('/api/settings');
+    $('providerStatus').innerHTML = Object.entries(s.providers).map(([name, info]) =>
+      `<div class="stat"><div class="l">${name}</div><div style="margin-top:4px;">${badge(info.status)}</div></div>`
+    ).join('') + `<div class="stat"><div class="l">Live sending</div><div style="margin-top:4px;">${badge(s.live_sending_allowed ? 'ENABLED' : 'DISABLED')}</div></div>`;
+  } catch (e) {}
+}
+
+function showNewCampaignForm() { $('newCampaignSection').classList.remove('hidden'); }
+function hideNewCampaignForm() { $('newCampaignSection').classList.add('hidden'); }
+
+// Client-side mirror of the backend's age rules (min/max >= 18, min <= max,
+// both optional) -- purely a fast-feedback UX layer. The backend is the
+// real source of truth and re-validates on submit regardless.
+function validateAgeFields() {
+  const minEl = $('f_age_min'), maxEl = $('f_age_max'), errEl = $('ageFieldError');
+  const min = minEl.value === '' ? null : parseInt(minEl.value, 10);
+  const max = maxEl.value === '' ? null : parseInt(maxEl.value, 10);
+  let msg = '';
+  if (min !== null && min < 18) msg = 'Minimum age must be 18 or older.';
+  else if (max !== null && max < 18) msg = 'Maximum age must be 18 or older.';
+  else if (min !== null && max !== null && min > max) msg = 'Minimum age cannot be greater than maximum age.';
+  errEl.textContent = msg;
+  return msg === '';
+}
+
+async function createCampaign() {
+  $('newCampaignError').textContent = '';
+  if (!validateAgeFields()) {
+    $('newCampaignError').textContent = 'Please fix the age filter before continuing.';
+    return;
+  }
+  const ageMinVal = $('f_age_min').value;
+  const ageMaxVal = $('f_age_max').value;
+  const caseText = $('f_case_text').value.trim();
+  const caseStudies = caseText ? [{
+    industries: splitList($('f_case_industries').value),
+    keywords: splitList($('f_case_keywords').value),
+    text: caseText,
+  }] : [];
+  const painPhrase = $('f_pain_phrase').value.trim();
+  const painPoints = painPhrase ? [{
+    industries: splitList($('f_pain_industries').value),
+    keywords: splitList($('f_pain_keywords').value),
+    label: $('f_pain_label').value.trim() || painPhrase.slice(0, 40),
+    phrase: painPhrase,
+  }] : [];
+  const payload = {
+    campaign_name: $('f_name').value,
+    description: $('f_desc').value,
+    target_titles: splitList($('f_titles').value),
+    industries: splitList($('f_industries').value),
+    keywords: splitList($('f_keywords').value),
+    locations: splitList($('f_locations').value) || ['United States'],
+    target_leads: parseInt($('f_target').value || '50', 10),
+    discovery_limit: parseInt($('f_disclimit').value || '200', 10),
+    age_min: ageMinVal === '' ? null : parseInt(ageMinVal, 10),
+    age_max: ageMaxVal === '' ? null : parseInt(ageMaxVal, 10),
+    email_subject_template: $('f_subject').value || null,
+    email_body_template: $('f_body').value || null,
+    email_sender_name: $('f_sender').value,
+    case_studies: caseStudies,
+    pain_points: painPoints,
+    sending_enabled: $('f_sending_enabled').checked,
+    send_mode: $('f_sendmode').value,
+  };
+  try {
+    const c = await api('/api/campaigns', { method: 'POST', body: JSON.stringify(payload) });
+    hideNewCampaignForm();
+    loadDashboard();
+    openCampaign(c.campaign_id);
+  } catch (e) { $('newCampaignError').textContent = 'Error: ' + e.message; }
+}
+
+function goDashboard() {
+  clearInterval(pollTimer);
+  $('view-campaign').classList.add('hidden');
+  $('view-dashboard').classList.remove('hidden');
+  loadDashboard();
+}
+
+// ---------- Campaign detail ----------
+
+async function openCampaign(id) {
+  currentCampaignId = id;
+  $('view-dashboard').classList.add('hidden');
+  $('view-campaign').classList.remove('hidden');
+  await refreshCampaignHeader();
+  switchTab('prospects');
+}
+
+async function refreshCampaignHeader() {
+  const c = await api(`/api/campaigns/${currentCampaignId}`);
+  $('cdTitle').textContent = c.campaign_name + '  ' + badge(c.status);
+  // Compact targeting summary -- age filter shown here per the "prospect
+  // age, not company age" requirement, formatted as 25–45 / 25+ / ≤45 / Any.
+  let ageLabel;
+  if (c.age_min != null && c.age_max != null) ageLabel = `${c.age_min}\u2013${c.age_max}`;
+  else if (c.age_min != null) ageLabel = `${c.age_min}+`;
+  else if (c.age_max != null) ageLabel = `\u2264${c.age_max}`;
+  else ageLabel = 'Any';
+  $('cdTargeting').textContent = `Titles: ${c.target_titles.join(', ') || 'Any'} · Industries: ${c.industries.join(', ') || 'Any'} · Age: ${ageLabel}`;
+  const stats = await api(`/api/campaigns/${currentCampaignId}/stats`);
+  $('cdStats').innerHTML = Object.entries(stats).map(([k, v]) =>
+    `<div class="stat"><div class="n">${v}</div><div class="l">${k}</div></div>`
+  ).join('');
+}
+
+function switchTab(name) {
+  ['prospects', 'accounts', 'emails', 'funnel'].forEach(t => {
+    $('tab-' + t).classList.toggle('active', t === name);
+    $('pane-' + t).classList.toggle('hidden', t !== name);
+  });
+  if (name === 'prospects') loadProspects();
+  if (name === 'accounts') loadAccounts();
+  if (name === 'emails') loadEmails();
+  if (name === 'funnel') loadFunnel();
+}
+
+// Renders a compact B/U/N/D badge row. Each letter's color reflects
+// unknown/weak_signal/strong_signal/confirmed -- deliberately never
+// green/confirmed unless the backend actually said so (it currently never
+// does automatically; see qualification_scoring.py docstring).
+function bundBadges(evidence) {
+  if (!evidence || !evidence.bund) return '<span class="muted">not yet scored</span>';
+  const cls = { unknown: 'sig-unknown', weak_signal: 'sig-weak', strong_signal: 'sig-strong', confirmed: 'sig-confirmed' };
+  const dims = ['B', 'U', 'N', 'D'];
+  return dims.map(d => {
+    const sig = (evidence.bund[d] || {});
+    const val = sig.value || 'unknown';
+    const title = (sig.evidence || 'no evidence found').replace(/"/g, '&quot;');
+    return `<span class="bund-badge ${cls[val] || 'sig-unknown'}" title="${title}">${d}</span>`;
+  }).join('');
+}
+
+function championBadge(evidence) {
+  if (!evidence || !evidence.champion_likelihood) return '';
+  const c = evidence.champion_likelihood;
+  if (!c.level || c.level === 'unknown') return '';
+  const cls = { low: 'champ-low', medium: 'champ-medium', high: 'champ-high' }[c.level] || 'champ-low';
+  const title = (c.evidence || []).join(' | ').replace(/"/g, '&quot;');
+  return `<span class="champ-badge ${cls}" title="${title}">${c.level} (${c.value})</span>`;
+}
+
+async function loadAccounts() {
+  const [accountsRes, funnelRes] = await Promise.all([
+    api(`/api/campaigns/${currentCampaignId}/accounts`),
+    api(`/api/campaigns/${currentCampaignId}/accounts/funnel`),
+  ]);
+
+  $('accountFunnel').innerHTML = Object.entries(funnelRes.stages).map(([k, v]) =>
+    `<div class="stat" style="display:inline-block;margin-right:8px;"><div class="n">${v}</div><div class="l">${k.replace(/_/g, ' ')}</div></div>`
+  ).join('');
+
+  $('accountList').innerHTML = accountsRes.items.map(a => {
+    const pathOrder = a.best_contact_path.reduce((m, id, i) => (m[id] = i, m), {});
+    const sortedContacts = [...a.contacts].sort((x, y) => (pathOrder[x.lead_id] ?? 999) - (pathOrder[y.lead_id] ?? 999));
+    return `
+    <div class="account-card" style="border:1px solid var(--border,#333);border-radius:8px;padding:12px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <b>${a.company_name}</b>
+        <span class="muted">${a.contact_count} contact${a.contact_count === 1 ? '' : 's'}${a.has_relevant_signal ? ' · relevant signal' : ''}</span>
+      </div>
+      <table style="margin-top:8px;">
+        <thead><tr><th>#</th><th>Name</th><th>Title</th><th>Role</th><th>Decision candidate</th><th>Champion</th></tr></thead>
+        <tbody>
+          ${sortedContacts.map((c, i) => `
+            <tr>
+              <td>${i + 1}${i === 0 ? ' <span class="muted">(recommended first)</span>' : ''}</td>
+              <td>${c.full_name || '—'}</td>
+              <td>${c.job_title || '—'}</td>
+              <td>${badge(c.pipeline_status)}</td>
+              <td>${c.is_decision_maker_candidate ? '<span class="ok">candidate</span>' : '<span class="muted">no evidence</span>'}</td>
+              <td>${c.is_potential_champion ? `<span class="champ-badge champ-${c.champion_level}">${c.champion_level} (${c.champion_likelihood})</span>` : '<span class="muted">—</span>'}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }).join('') || '<div class="muted">No accounts yet — run Discover.</div>';
+}
+
+async function loadProspects() {
+  const q = $('prospectSearch').value;
+  const params = new URLSearchParams({ page_size: '100' });
+  if (q) params.set('search', q);
+  const data = await api(`/api/campaigns/${currentCampaignId}/prospects?${params}`);
+  $('prospectList').innerHTML = data.items.map(p => `
+    <tr>
+      <td>${p.full_name || '—'}</td>
+      <td>${p.company_name || '—'}</td>
+      <td>${p.job_title || '—'}</td>
+      <td>${p.email || '—'}</td>
+      <td>${badge(p.pipeline_status)}</td>
+      <td>${bundBadges(p.qualification_evidence)}</td>
+      <td>${championBadge(p.qualification_evidence)}</td>
+    </tr>`).join('') || '<tr><td colspan="7" class="muted">No prospects yet — run Discover.</td></tr>';
+}
+
+async function loadEmails() {
+  const data = await api(`/api/campaigns/${currentCampaignId}/emails?page_size=100`);
+  $('emailList').innerHTML = data.items.map(e => {
+    const m = e.metadata || {};
+    const hasMeta = Object.keys(m).length > 0;
+    // Debug/detail metadata (requirement J) -- collapsed by default so the
+    // email itself stays the primary visual element; never shown inline.
+    const detailsHtml = hasMeta ? `
+      <details style="margin-top:8px;">
+        <summary class="muted" style="cursor:pointer;">Personalization details</summary>
+        <div class="muted" style="margin-top:6px; font-size:12px; line-height:1.6;">
+          Hook type: <b>${m.hook_type || '—'}</b><br/>
+          Evidence used: <b>${m.evidence_used ? 'yes' : 'no'}</b>${m.evidence_sources && m.evidence_sources.length ? ` (${m.evidence_sources.join('; ')})` : ''}<br/>
+          Personalization confidence: <b>${m.personalization_confidence != null ? m.personalization_confidence : '—'}</b><br/>
+          CTA type: <b>${m.cta_type || '—'}</b><br/>
+          Quality score: <b>${m.email_quality_score != null ? m.email_quality_score + '/100' : '—'}</b><br/>
+          Stage: <b>${m.stage || '—'}</b>
+        </div>
+      </details>` : '';
+    return `
+    <div class="email-card">
+      <div class="row" style="justify-content:space-between;align-items:center;">
+        <div><b>${e.prospect_name}</b> — ${e.prospect_company} &lt;${e.to_email}&gt;</div>
+        <div>${badge(e.review_status)}</div>
+      </div>
+      <div class="subject">${e.subject}</div>
+      <div class="body">${e.body}</div>
+      ${detailsHtml}
+      <div class="toolbar">
+        <button class="ok" onclick="emailAction('${e.lead_id}','approve')" ${e.review_status !== 'PENDING' ? 'disabled' : ''}>Approve</button>
+        <button class="danger" onclick="emailAction('${e.lead_id}','reject')" ${e.review_status !== 'PENDING' ? 'disabled' : ''}>Reject</button>
+      </div>
+    </div>`;
+  }).join('') || '<div class="muted">No generated emails yet — run Generate.</div>';
+}
+
+async function emailAction(leadId, action) {
+  await api(`/api/emails/${leadId}/${action}`, { method: 'POST', body: JSON.stringify({ reason: '' }) });
+  loadEmails();
+}
+
+async function bulkEmailAction(action) {
+  await api(`/api/campaigns/${currentCampaignId}/emails/${action}`, { method: 'POST', body: JSON.stringify({ reason: '' }) });
+  loadEmails();
+}
+
+async function loadFunnel() {
+  const f = await api(`/api/campaigns/${currentCampaignId}/funnel`);
+  const max = Math.max(1, ...f.stages.map(s => s.count));
+  $('funnelChart').innerHTML = f.stages.map(s => `
+    <div style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;">
+        <span>${s.stage}</span><span>${s.count}</span>
+      </div>
+      <div class="bar"><div style="width:${(s.count / max * 100).toFixed(0)}%"></div></div>
+    </div>`).join('') +
+    (Object.keys(f.rejection_reasons).length
+      ? `<h2 style="margin-top:16px;">Drop-off reasons</h2>` + Object.entries(f.rejection_reasons)
+          .map(([k, v]) => `<div class="muted">${k}: ${v}</div>`).join('')
+      : '');
+}
+
+// ---------- Actions / jobs ----------
+
+async function runAction(action) {
+  try {
+    const job = await api(`/api/campaigns/${currentCampaignId}/${action}`, { method: 'POST' });
+    pollJob(job.job_id);
+  } catch (e) { $('jobStatus').innerHTML = `<div class="job-line" style="color:var(--danger)">${e.message}</div>`; }
+}
+
+async function runControl(action) {
+  await api(`/api/campaigns/${currentCampaignId}/${action}`, { method: 'POST' });
+  refreshCampaignHeader();
+}
+
+function pollJob(jobId) {
+  clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    const j = await api(`/api/jobs/${jobId}`);
+    const pct = j.total ? Math.round(j.progress * 100) : 0;
+    const s = j.stats || {};
+    // Keep these visually distinct: "queries" (search attempts against the
+    // 3774-query plan) is NOT the same number as "processed" (raw
+    // candidates found, capped at the campaign's target_count) — showing
+    // "6/3774" in the prospects slot was the literal bug reported live.
+    const queryLine = s.queries_total
+      ? `<div class="muted">search queries: ${s.queries_done ?? 0}/${s.queries_total}</div>`
+      : '';
+    const qualLine = (s.qualified !== undefined)
+      ? `<div class="muted">qualified: ${s.qualified} · filtered out: ${s.filtered_out ?? 0}</div>`
+      : '';
+    $('jobStatus').innerHTML = `
+      <div class="job-line">
+        <b>${j.type}</b> — ${j.status} (${j.phase || ''})<br/>
+        ${j.processed}/${j.total} candidates discovered · ${j.successful} ok · ${j.failed} failed
+        ${queryLine}
+        ${qualLine}
+        <div class="bar"><div style="width:${pct}%"></div></div>
+        ${j.error ? `<div style="color:var(--danger)">${j.error}</div>` : ''}
+      </div>`;
+
+    // Live-refresh the dashboard WHILE the job is running -- previously
+    // this only happened after the job reached a terminal state, which is
+    // why the UI sat at "0 discovered / No prospects yet" for the entire
+    // (now incrementally-persisted) discovery run.
+    refreshCampaignHeader();
+    if (!$('pane-prospects').classList.contains('hidden')) loadProspects();
+    if (!$('pane-accounts').classList.contains('hidden')) loadAccounts();
+    if (!$('pane-funnel').classList.contains('hidden')) loadFunnel();
+
+    if (['completed', 'failed', 'cancelled'].includes(j.status)) {
+      clearInterval(pollTimer);
+      refreshCampaignHeader();
+      loadProspects(); loadEmails(); loadFunnel();
+    }
+  }, 700);
+}
+
+loadDashboard();
+</script>
+</body>
+</html>

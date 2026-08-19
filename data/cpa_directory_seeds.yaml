@@ -1,0 +1,60 @@
+seeds:
+  # Public rankings pages that list CPA firm names/leaders; crawler follows
+  # into each firm's own public "team"/"leadership"/"partners" pages via
+  # include_patterns, same pattern as the original angel_directory_seeds.yaml.
+  # Note: AICPA's and state-society "Find a CPA" member directories are
+  # deliberately excluded — their published terms prohibit use of that data
+  # for marketing/outreach purposes.
+
+  - name: ipa_top_500_firms
+    url: https://insidepublicaccounting.com/ipa-top-500-firms/
+    engine: crawl4ai
+    max_pages: 40
+    max_depth: 2
+    include_patterns:
+      - firm
+      - team
+      - leadership
+      - partner
+      - about
+
+  - name: ipa_top_firms_content
+    url: https://insidepublicaccounting.com/ipa-top-firms/
+    engine: agentcrawl
+    max_pages: 30
+    max_depth: 2
+    include_patterns:
+      - managing-partner
+      - leadership
+      - profile
+
+  - name: ipa_best_of_the_best
+    url: https://insidepublicaccounting.com/ipa-best-of-the-best/
+    engine: crawl4ai
+    max_pages: 25
+    max_depth: 1
+    include_patterns:
+      - firm
+      - leadership
+
+  - name: accounting_today_top_100
+    url: https://www.accountingtoday.com/list/the-2026-top-100-firms
+    engine: webclaw
+    max_pages: 20
+    max_depth: 1
+
+  - name: accounting_today_fastest_growing
+    url: https://www.accountingtoday.com/list/the-2026-fastest-growing-accounting-firms
+    engine: webclaw
+    max_pages: 20
+    max_depth: 1
+
+  - name: accounting_today_regional_leaders
+    url: https://www.accountingtoday.com/list
+    engine: crawl4ai
+    max_pages: 25
+    max_depth: 1
+    include_patterns:
+      - regional-leaders
+      - top-100
+      - firms

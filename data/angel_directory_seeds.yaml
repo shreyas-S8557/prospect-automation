@@ -1,0 +1,47 @@
+seeds:
+  # Public pages that expose angel/member LinkedIn links where possible
+  - name: golden_seeds_team
+    url: https://www.goldenseeds.com/team
+    engine: agentcrawl
+    max_pages: 40
+    max_depth: 2
+
+  - name: band_of_angels
+    url: https://www.bandangels.com/
+    engine: crawl4ai
+    max_pages: 30
+    max_depth: 2
+    include_patterns:
+      - member
+      - team
+      - about
+      - portfolio
+      - people
+
+  - name: band_of_angels_about
+    url: https://www.bandangels.com/about
+    engine: webclaw
+    max_pages: 20
+    max_depth: 1
+
+  - name: tech_coast_angels
+    url: https://www.techcoastangels.com/
+    engine: crawl4ai
+    max_pages: 40
+    max_depth: 2
+
+  - name: openvc_angels
+    url: https://www.openvc.app/investor-lists/angel-investors
+    engine: crawl4ai
+    max_pages: 25
+    max_depth: 1
+    include_patterns:
+      - investor
+      - angel
+      - linkedin
+
+  - name: fund_flow_readme
+    url: https://raw.githubusercontent.com/Dessiidoo/Fund-Flow-AI/main/attached_assets/Fund_Database-Angel_Investors_1766572251362.csv
+    engine: webclaw
+    max_pages: 1
+    max_depth: 0
